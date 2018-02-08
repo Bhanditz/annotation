@@ -13,6 +13,8 @@ public interface SwaggerConstants {
 	@Deprecated
 	public static final String SAMPLES_EUROPEANA_API = "Please find JSON-LD samples for annotation in <a href=\"../jsp/template/europeana-ld-api.jsp\" target=\"_blank\">templates</a>. " +
 			"Provider parameter is optional but checked if provided. For now historypin is the only accepted provider. AnnotationNr is optional, but if provided a valid provider must be submitted";
+	public static final String SAMPLES_PROVIDER_API = "Please find JSON-LD samples for provider API in <a href=\"../jsp/template/provider-api.jsp\" target=\"_blank\">templates</a>. " +
+			"Provider ID is optional but checked if provided.";
 	public static final String SAMPLES_JSONLD = "Please find JSON-LD samples for annotation in <a href=\"../jsp/template/jsonld.jsp\" target=\"_blank\">templates</a>. " +
 			"Provider parameter is optional but checked if provided. For now historypin is the only accepted provider. AnnotationNr is optional, but if provided a valid provider must be submitted";
 	public static final String UPDATE_SAMPLES_JSONLD = "Please find JSON-LD samples for annotation in <a href=\"../jsp/template/jsonld.jsp\" target=\"_blank\">templates</a>. " +

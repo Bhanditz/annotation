@@ -1,8 +1,8 @@
-package eu.europeana.annotation.mongo.model.internal;
+package eu.europeana.annotation.mongo.model.authentication.internal;
 
 import org.bson.types.ObjectId;
 
-import eu.europeana.annotation.definitions.model.Provider;
+import eu.europeana.annotation.definitions.model.authentication.Provider;
 import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
 
 /**
@@ -12,6 +12,8 @@ import eu.europeana.api.commons.nosql.entity.NoSqlEntity;
 public interface PersistentProvider extends Provider, NoSqlEntity {
 
 	public final static String FIELD_NAME           = "name";
+	public final static String FIELD_HTTP_URL       = "httpUrl";
+//	public final static String FIELD_API_KEY        = "apiKey";
 	public final static String FIELD_ID_GENERATION  = "idGeneration";
 
 	/**
@@ -25,9 +27,5 @@ public interface PersistentProvider extends Provider, NoSqlEntity {
 	 * @param id
 	 */
 	public void setId(ObjectId id);
-
-	public abstract void setLastIndexedTimestamp(Long lastIndexedTimestamp);
-
-	public abstract Long getLastIndexedTimestamp();
 	
 }

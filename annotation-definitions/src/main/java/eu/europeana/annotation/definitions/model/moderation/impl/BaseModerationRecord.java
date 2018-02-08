@@ -66,11 +66,11 @@ public class BaseModerationRecord implements ModerationRecord {
 		this.created = created;
 	}
 
-	public Date getLastUpdated() {
+	public Date getLastUpdate() {
 		return lastUpdated;
 	}
 
-	public void setLastUpdated(Date lastUpdated) {
+	public void setLastUpdate(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
 	

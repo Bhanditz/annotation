@@ -142,7 +142,7 @@ public class PersistentModerationRecordServiceImpl extends AbstractNoSqlServiceI
 		persistentModerationRecord.setReportList(moderationRecord.getReportList());
 		persistentModerationRecord.setSummary(moderationRecord.getSummary());
 		persistentModerationRecord.setCreated(moderationRecord.getCreated());
-		persistentModerationRecord.setLastUpdated(moderationRecord.getLastUpdated());
+		persistentModerationRecord.setLastUpdate(moderationRecord.getLastUpdate());
 		return persistentModerationRecord;
 	}
 

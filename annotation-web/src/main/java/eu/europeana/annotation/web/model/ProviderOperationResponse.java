@@ -1,6 +1,6 @@
 package eu.europeana.annotation.web.model;
 
-import eu.europeana.annotation.definitions.model.Provider;
+import eu.europeana.annotation.definitions.model.authentication.Provider;
 import eu.europeana.api2.web.model.json.abstracts.ApiResponse;
 
 public class ProviderOperationResponse extends ApiResponse{

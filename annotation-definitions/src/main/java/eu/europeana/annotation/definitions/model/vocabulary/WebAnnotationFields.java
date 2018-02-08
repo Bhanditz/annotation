@@ -86,8 +86,12 @@ public interface WebAnnotationFields extends WebAnnotationModelFields{
 	public static final String PATH_PARAM_FORMAT = "format";
 	public static final String PATH_PARAM_PROVIDER = "provider";
 	public static final String PATH_PARAM_IDENTIFIER = "identifier";
+	public static final String PATH_PARAM_PROVIDER_ID = "providerId";
+	public static final String PATH_PARAM_USER_ID = "userId";
 	public static final String PATH_FIELD_REPORT = "report";
 	public static final String PATH_FIELD_MODERATION_SUMMARY = "moderationsummary";
+	public static final String PROVIDER_ID_PREFIX = "http://data.europeana.eu/annotation/provider/";
+	public static final String USER_ID_PREFIX = "http://data.europeana.eu/annotation/user/";
 	//Not needed yet
 	//public static final String WHITELIST = "whitelist";
 
@@ -97,6 +101,10 @@ public interface WebAnnotationFields extends WebAnnotationModelFields{
 	 * Query Params
 	 */
 	public static final String PARAM_WSKEY = "wskey";
+	public static final String PARAM_CLIENT_SECRET = "clientSecret";
+	public static final String PARAM_USERNAME = "userName";
+	public static final String PARAM_PASSWORD = "password";
+	public static final String PARAM_TYPE = "type";
 	public static final String PARAM_QUERY = "query";
 	public static final String PARAM_QF = "qf";
 	public static final String PARAM_FACET = "facet";

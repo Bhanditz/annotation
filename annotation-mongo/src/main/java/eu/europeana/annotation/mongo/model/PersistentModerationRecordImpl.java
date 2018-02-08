@@ -7,6 +7,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.Indexes;
@@ -106,11 +107,11 @@ public class PersistentModerationRecordImpl implements PersistentModerationRecor
 		this.created = created;
 	}
 
-	public Date getLastUpdated() {
+	public Date getLastUpdate() {
 		return lastUpdated;
 	}
 
-	public void setLastUpdated(Date lastUpdated) {
+	public void setLastUpdate(Date lastUpdated) {
 		this.lastUpdated = lastUpdated;
 	}
 
@@ -143,5 +144,4 @@ public class PersistentModerationRecordImpl implements PersistentModerationRecor
 	public boolean equalsContent(Object other) {
 		throw new RuntimeException(new ModerationMongoException("Method not supported"));
 	}
-
 }

@@ -4,22 +4,23 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.stanbol.commons.exception.JsonParseException;
 
 import eu.europeana.annotation.definitions.exception.AnnotationValidationException;
+import eu.europeana.annotation.definitions.exception.ProviderValidationException;
+import eu.europeana.annotation.definitions.exception.UserValidationException;
 import eu.europeana.annotation.definitions.model.Annotation;
 import eu.europeana.annotation.definitions.model.AnnotationId;
-import eu.europeana.annotation.definitions.model.Provider;
 import eu.europeana.annotation.definitions.model.StatusLog;
+import eu.europeana.annotation.definitions.model.agent.Agent;
+import eu.europeana.annotation.definitions.model.authentication.Provider;
+import eu.europeana.annotation.definitions.model.authentication.User;
 import eu.europeana.annotation.definitions.model.entity.Concept;
 import eu.europeana.annotation.definitions.model.moderation.ModerationRecord;
 import eu.europeana.annotation.definitions.model.resource.impl.TagResource;
-import eu.europeana.annotation.definitions.model.utils.AnnotationHttpUrls;
-import eu.europeana.annotation.definitions.model.utils.AnnotationsList;
+import eu.europeana.annotation.definitions.model.vocabulary.AgentTypes;
 import eu.europeana.annotation.definitions.model.vocabulary.MotivationTypes;
-import eu.europeana.annotation.mongo.exception.AnnotationMongoException;
 import eu.europeana.annotation.mongo.exception.BulkOperationException;
 import eu.europeana.annotation.mongo.exception.ModerationMongoException;
 import eu.europeana.annotation.mongo.model.internal.PersistentAnnotation;
@@ -31,9 +32,10 @@ import eu.europeana.annotation.web.exception.authorization.UserAuthorizationExce
 import eu.europeana.annotation.web.exception.request.ParamValidationException;
 import eu.europeana.annotation.web.exception.response.AnnotationNotFoundException;
 import eu.europeana.annotation.web.exception.response.ModerationNotFoundException;
-import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.annotation.web.model.BatchReportable;
 import eu.europeana.annotation.web.model.BatchUploadStatus;
+//import eu.europeana.annotation.web.service.impl.Agent;
+import eu.europeana.api.commons.web.exception.HttpException;
 
 public interface AnnotationService {
 
@@ -94,27 +96,49 @@ public interface AnnotationService {
 	 * @param newProvider
 	 * @return Provider object
 	 */
-	public Provider storeProvider(Provider newProvider);
+	public Provider storeProvider(Provider newProvider) throws ProviderValidationException;
 
 	/**
-	 * @param idGeneration
-	 * @return
+	 * @param id
 	 */
-	public List<? extends Provider> getProviderList(String idGeneration);
+	public int deleteProviderEntry(String id) throws ProviderValidationException;
 	
 	/**
-	 * @param idGeneration
-	 * @param startOn
-	 * @param limit
-	 * @return
+	 * @param name
 	 */
-	public List<? extends Provider> getFilteredProviderList(String idGeneration, String startOn, String limit);		
+	public int deleteProviderEntryByName(String name) throws ProviderValidationException;
+	
+	/**
+	 * This method creates User object in database.
+	 * @param newUser
+	 * @return User object
+	 */
+	public User storeUser(User newUser) throws UserValidationException;
+
+	/**
+	 * @param name
+	 */
+	public int deleteUserEntry(String name) throws ProviderValidationException;
+	
+//	/**
+//	 * @param idGeneration
+//	 * @return
+//	 */
+//	public List<? extends Provider> getProviderList(String idGeneration);
+	
+//	/**
+//	 * @param idGeneration
+//	 * @param startOn
+//	 * @param limit
+//	 * @return
+//	 */
+//	public List<? extends Provider> getFilteredProviderList(String idGeneration, String startOn, String limit);		
 	
 	/**
 	 * @param newProvider
 	 * @return
 	 */
-	public Provider updateProvider(Provider newProvider);
+	public Provider updateProvider(Provider newProvider) throws ProviderValidationException;
 	
 	/**
 	 * @param name
@@ -250,6 +274,23 @@ public interface AnnotationService {
 	public boolean existsProviderInDb(Provider provider); 
 	
 	/**
+	 * Check whether given provider already exists in database using provider ID (httpUrl).
+	 */
+	public boolean existsProviderIdInDb(String providerId);
+	
+	/**
+	 * Check whether given user already exists in database.
+	 */
+	public boolean existsUserInDb(User user); 
+	
+	/**
+	 * Check whether given user already exists in database using user ID (httpUrl).
+	 * @param userId
+	 * @return true if exists
+	 */
+	public boolean existsUserIdInDb(String userId);
+	
+	/**
 	 * This method updates annotation status.
 	 * @param annotation
 	 * @return
@@ -334,4 +375,6 @@ public interface AnnotationService {
 
 	public void insertNewAnnotations(String provider, BatchUploadStatus uploadStatus, List<? extends Annotation> annotations, AnnotationDefaults annoDefaults, LinkedHashMap<Annotation, Annotation> webAnnoStoredAnnoAnnoMap) throws AnnotationValidationException, BulkOperationException;
 
+	public Agent parseAgentLd(AgentTypes agentType, String agentJsonLdStr) throws JsonParseException, HttpException;
+	
 }

@@ -1,6 +1,7 @@
 package eu.europeana.annotation.mongo.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import eu.europeana.annotation.mongo.model.internal.PersistentObject;
 
 @Entity("concept")
 @Polymorphic
+/** @Deprecated replaced by entity api */
 public class PersistentConceptImpl implements PersistentConcept, PersistentObject {
 
 	@Id
@@ -644,6 +646,30 @@ public class PersistentConceptImpl implements PersistentConcept, PersistentObjec
 	        this.closeMatch = new HashMap<String, String>();
 	    }
 	    this.closeMatch.put(id + "_" + WebAnnotationFields.CLOSE_MATCH, label);
+	}
+
+	@Override
+	public Date getCreated() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setCreated(Date creationDate) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Date getLastUpdate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setLastUpdate(Date lastUpdate) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

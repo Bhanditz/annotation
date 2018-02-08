@@ -1,5 +1,7 @@
 package eu.europeana.annotation.mongo.model;
 
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -39,6 +41,16 @@ public class PersistentClientImpl extends BaseClientImpl implements PersistentCl
 				+ "Id:" + getId() + ", " 
 	            + "clientId:" + getClientId() + ", " 
 	            + "authenticationConfigJson:" + getAuthenticationConfigJson() + "]";
+	}
+
+	@Override
+	public Date getCreated() {
+		return this.getCreationDate();
+	}
+
+	@Override
+	public void setCreated(Date creationDate) {
+		this.setCreationDate(creationDate);
 	}
 
 

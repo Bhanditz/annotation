@@ -1,5 +1,6 @@
 package eu.europeana.annotation.web.exception;
 
+//TODO convert to http exception
 public class AnnotationIndexingException extends Exception{
 
 	public AnnotationIndexingException(String message, Throwable th) {

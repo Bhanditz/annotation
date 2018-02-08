@@ -20,6 +20,7 @@ import eu.europeana.api.commons.nosql.service.impl.AbstractNoSqlServiceImpl;
 
 
 @Component
+/** @Deprecated replaced by entity api */
 public class PersistentConceptServiceImpl extends
 		AbstractNoSqlServiceImpl<PersistentConcept, String> implements
 		PersistentConceptService {

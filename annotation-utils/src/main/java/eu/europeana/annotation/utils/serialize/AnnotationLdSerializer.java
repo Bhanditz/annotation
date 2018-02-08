@@ -35,6 +35,12 @@ public class AnnotationLdSerializer extends JsonLd {
 		setAnnotation(annotation);
 	}
 
+	public AnnotationLdSerializer(Agent agent) {
+		super();
+		setPropOrderComparator(new AnnotationsJsonComparator());
+		setAgent(agent);
+	}
+
 	public AnnotationLdSerializer() {
 		super();
 		setPropOrderComparator(new AnnotationsJsonComparator());
@@ -89,6 +95,33 @@ public class AnnotationLdSerializer extends JsonLd {
 		putStringProperty(WebAnnotationFields.CANONICAL, annotation.getCanonical(), jsonLdResource);
 		putStringArrayProperty(WebAnnotationFields.VIA, annotation.getVia(), jsonLdResource, true);
 		
+		put(jsonLdResource);
+		
+		return jsonLdResource;
+	}
+		
+	/**
+	 * Adds the given annotation to this JsonLd object using the resource's
+	 * subject as key. If the key is NULL and there does not exist a resource
+	 * with an empty String as key the resource will be added using an empty
+	 * String ("") as key.
+	 * 
+	 * @param annotation
+	 */
+	public JsonLdResource setAgent(Agent agent) {
+
+		setUseTypeCoercion(false);
+		setUseCuries(true);
+		setUsedNamespaces(namespacePrefixMap);
+
+		JsonLdResource jsonLdResource = new JsonLdResource();
+		jsonLdResource.setSubject("");
+		jsonLdResource.putProperty(WebAnnotationFields.AT_CONTEXT, ContextTypes.ANNO.getJsonValue());
+
+		if (agent.getClass().getCanonicalName().toLowerCase().contains(WebAnnotationFields.PROVIDER))
+			putProvider(jsonLdResource, agent);
+		else
+			putUser(jsonLdResource, agent);
 		put(jsonLdResource);
 		
 		return jsonLdResource;
@@ -175,7 +208,7 @@ public class AnnotationLdSerializer extends JsonLd {
 	protected void putCreator(Annotation annotation, JsonLdResource jsonLdResource) {
 		if (annotation.getCreator().getInputString() == null
 				|| isJsonObjectInput(annotation.getCreator().getInputString())) {
-			JsonLdProperty annotatedByProperty = addCreator(annotation);
+			JsonLdProperty annotatedByProperty = buildCreator(annotation);
 			if (annotatedByProperty != null)
 				jsonLdResource.putProperty(annotatedByProperty);
 		} else {
@@ -183,10 +216,22 @@ public class AnnotationLdSerializer extends JsonLd {
 		}
 	}
 
+	protected void putProvider(JsonLdResource jsonLdResource, Agent agent) {
+		JsonLdProperty annotatedByProperty = buildProvider(agent);
+		if (annotatedByProperty != null)
+			jsonLdResource.putProperty(annotatedByProperty);
+	}
+
+	protected void putUser(JsonLdResource jsonLdResource, Agent agent) {
+		JsonLdProperty annotatedByProperty = buildUser(agent);
+		if (annotatedByProperty != null)
+			jsonLdResource.putProperty(annotatedByProperty);
+	}
+
 	protected void putGenerator(Annotation annotation, JsonLdResource jsonLdResource) {
 		if (annotation.getGenerator().getInputString() == null
 				|| isJsonObjectInput(annotation.getGenerator().getInputString())) {
-			JsonLdProperty serializedByProperty = addGeneratorProperty(annotation);
+			JsonLdProperty serializedByProperty = buildGenerator(annotation);
 			if (serializedByProperty != null)
 				jsonLdResource.putProperty(serializedByProperty);
 		} else {
@@ -264,26 +309,6 @@ public class AnnotationLdSerializer extends JsonLd {
 
 		targetPropertyValue.putProperty(sourceProperty);
 	}
-
-//	private JsonLdProperty addConceptProperty(Concept concept) {
-//		JsonLdProperty conceptProperty = new JsonLdProperty(WebAnnotationFields.CONCEPT);
-//		JsonLdPropertyValue propertyValue = new JsonLdPropertyValue();
-//
-//		if (concept != null) {
-//			addListToPropertyValue(concept.getNotation(), propertyValue, WebAnnotationFields.NOTATION);
-//			addListToPropertyValue(concept.getNarrower(), propertyValue, WebAnnotationFields.NARROWER);
-//			addListToPropertyValue(concept.getBroader(), propertyValue, WebAnnotationFields.BROADER);
-//			addListToPropertyValue(concept.getRelated(), propertyValue, WebAnnotationFields.RELATED);
-//
-//			addMapToPropertyValue(concept.getPrefLabel(), propertyValue, WebAnnotationFields.PREF_LABEL);
-//			addMapToPropertyValue(concept.getHiddenLabel(), propertyValue, WebAnnotationFields.HIDDEN_LABEL);
-//			addMapToPropertyValue(concept.getAltLabel(), propertyValue, WebAnnotationFields.ALT_LABEL);
-//			if (propertyValue.getValues().size() != 0) {
-//				conceptProperty.addValue(propertyValue);
-//			}
-//		}
-//		return conceptProperty;
-//	}
 
 	/**
 	 * @param annotation
@@ -385,15 +410,8 @@ public class AnnotationLdSerializer extends JsonLd {
 					buildListProperty(WebAnnotationFields.TYPE, types, true));
 	}
 
-	private JsonLdProperty addGeneratorProperty(Annotation annotation) {
-		JsonLdProperty generatorProperty = new JsonLdProperty(WebAnnotationFields.GENERATOR);
-		JsonLdPropertyValue propertyValue = new JsonLdPropertyValue();
-		Agent agent = annotation.getGenerator();
-		addAgentByProperty(propertyValue, agent);
-		if (propertyValue.getValues().size() == 0)
-			return null;
-		generatorProperty.addValue(propertyValue);
-		return generatorProperty;
+	private JsonLdProperty buildGenerator(Annotation annotation) {
+		return buildAgentProperty(WebAnnotationFields.GENERATOR, annotation.getGenerator());
 	}
 
 	private void addAgentByProperty(JsonLdPropertyValue propertyValue, Agent agent) {
@@ -416,15 +434,26 @@ public class AnnotationLdSerializer extends JsonLd {
 			propertyValue.getValues().put(WebAnnotationFields.EMAIL_SHA1, agent.getEmail_Sha1());
 	}
 
-	private JsonLdProperty addCreator(Annotation annotation) {
-		JsonLdProperty creator = new JsonLdProperty(WebAnnotationFields.CREATOR);
+	private JsonLdProperty buildCreator(Annotation annotation) {
+		return buildAgentProperty(WebAnnotationFields.CREATOR, annotation.getCreator());
+	}
+
+	private JsonLdProperty buildAgentProperty(String propertyName, Agent agent) {
+		JsonLdProperty property = new JsonLdProperty(propertyName);
 		JsonLdPropertyValue propertyValue = new JsonLdPropertyValue();
-		Agent agent = annotation.getCreator();
 		addAgentByProperty(propertyValue, agent);
 		if (propertyValue.getValues().size() == 0)
 			return null;
-		creator.addValue(propertyValue);
-		return creator;
+		property.addValue(propertyValue);
+		return property;
+	}
+
+	public JsonLdProperty buildProvider(Agent agent) {
+		return buildAgentProperty(WebAnnotationFields.PROVIDER, agent);
+	}
+
+	public JsonLdProperty buildUser(Agent agent) {
+		return buildAgentProperty(WebAnnotationFields.USER, agent);
 	}
 
 	private boolean isJsonObjectInput(String inputString) {

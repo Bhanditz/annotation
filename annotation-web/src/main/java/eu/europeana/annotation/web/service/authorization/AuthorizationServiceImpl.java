@@ -16,7 +16,7 @@ import eu.europeana.annotation.web.exception.authentication.ApplicationAuthentic
 import eu.europeana.annotation.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.annotation.web.exception.authorization.UserAuthorizationException;
 import eu.europeana.annotation.web.model.vocabulary.Operations;
-import eu.europeana.annotation.web.model.vocabulary.UserGroups;
+import eu.europeana.annotation.web.model.vocabulary.Roles;
 import eu.europeana.annotation.web.service.authentication.AuthenticationService;
 import eu.europeana.api.common.config.I18nConstants;
 
@@ -134,9 +134,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
 	//verify user privileges
 	protected boolean hasPermission(Agent user, String operationName) {
-		UserGroups userGroup = UserGroups.valueOf(user.getUserGroup());
+		Roles role = Roles.valueOf(user.getUserGroup());
 		
-		for (String operation : userGroup.getOperations()) {
+		for (String operation : role.getOperations()) {
 			if(operation.equalsIgnoreCase(operationName))
 				return true;//users is authorized, everything ok
 		}
@@ -145,11 +145,11 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 	}
 
 	protected boolean isAdmin(Agent user) {
-		return UserGroups.ADMIN.name().equals(user.getUserGroup());
+		return Roles.ADMIN.name().equals(user.getUserGroup());
 	}
 	
 	protected boolean isTester(Agent user) {
-		return UserGroups.TESTER.name().equals(user.getUserGroup());
+		return Roles.TESTER.name().equals(user.getUserGroup());
 	}
 	
 	@Override

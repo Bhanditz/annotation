@@ -2,7 +2,7 @@ package eu.europeana.annotation.mongo.dao;
 
 import java.io.Serializable;
 
-import eu.europeana.annotation.mongo.model.internal.PersistentProvider;
+import eu.europeana.annotation.mongo.model.authentication.internal.PersistentProvider;
 
 /**
  *

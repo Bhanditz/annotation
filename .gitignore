@@ -3,3 +3,7 @@
 **/.settings/
 .classpath
 **/classes/
+/annotation-client/
+/annotation-web/
+/annotation-mongo/
+/annotation-definitions/

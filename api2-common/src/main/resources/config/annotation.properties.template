@@ -94,6 +94,7 @@ annotation.properties.timestamp=-1
 api=annotation
 adminapikey=
 adminsecretkey=
+validation.string=ProviderValidation
 # cache time for validation of ApiKey in milliseconds (value of type long)
 # e.g. 1800000 is 30 minutes
 annotation.apikey.caching.time=1800000 

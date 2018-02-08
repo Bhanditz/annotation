@@ -78,6 +78,29 @@ public class AnnotationLdParser extends JsonLdParser {
 		return parseAnnotation(motivationType, jo);
 	}
 
+	public Agent parseAgentStr(AgentTypes agentType, String jsonLdString) throws JsonParseException {
+
+		JSONObject jo;
+		try {
+			jo = parseJson(jsonLdString);
+		} catch (JSONException e) {
+			throw new JsonParseException("Cannot parse json string: " + jsonLdString, e);
+		}
+
+		return parseAgentJson(agentType, jo);
+	}
+
+	public Agent parseAgentJson(AgentTypes agentType, JSONObject jo) throws JsonParseException {
+		Agent agent = null;
+		try {
+			agent = parseAgent(agentType, jo);
+		} catch (RuntimeException e) {
+			throw new AnnotationValidationException("cannot instantiate Agent! " + e.getMessage(), e);
+		}
+		return agent;
+	}
+
+	
 	public Annotation parseAnnotation(MotivationTypes motivationType, JSONObject jo) throws JsonParseException {
 		Annotation annotation = null;
 		try {
@@ -326,7 +349,7 @@ public class AnnotationLdParser extends JsonLdParser {
 		return parseAgent(AgentTypes.SOFTWARE, valueObject);
 	}
 
-	private Agent parseAgent(AgentTypes defaultAgentType, Object valueObject) throws JsonParseException {
+	public Agent parseAgent(AgentTypes defaultAgentType, Object valueObject) throws JsonParseException {
 		if (valueObject instanceof String)
 			return parseAgent(defaultAgentType, (String) valueObject);
 		else if (valueObject instanceof JSONObject)

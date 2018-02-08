@@ -36,7 +36,7 @@ public class ApiResponseBuilder {
 	 * @param errorMessage
 	 * @return
 	 */
-	protected AnnotationOperationResponse getValidationReport(String apiKey, String action, String errorMessage, Throwable th, boolean includeErrorStack) {
+	public AnnotationOperationResponse getValidationReport(String apiKey, String action, String errorMessage, Throwable th, boolean includeErrorStack) {
 
 		AnnotationOperationResponse response = new AnnotationOperationResponse(
 				apiKey, action);

@@ -32,6 +32,8 @@ public class ParamValidationException extends HttpException{
 	public static final String MESSAGE_INVALID_TAG_ID_FORMAT = MESSAGE_INVALID_TAG_FORMAT + " The internal id must be an URL!";
 	public static final String MESSAGE_MISSING_MANDATORY_FIELD = "Missing mandatory field!";
 	public static final String MESSAGE_WRONG_CLASS = "The object class doesn't match the input format!";
+	public static final String MESSAGE_PROVIDER_IDENTIFIER_WRONG = 
+			"Provider identifier number given as a parameter must match with a provider identifier number given in template! E.g. 'http://data.europeana.eu/annotation/provider/1'";
 	
 	public static final int MIN_IDENTIFIER_LEN = 2;
 

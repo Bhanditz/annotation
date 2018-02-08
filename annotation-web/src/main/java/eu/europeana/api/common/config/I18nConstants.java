@@ -14,6 +14,7 @@ public interface I18nConstants {
 	static final String ANNOTATION_VALIDATION = "error.annotation_validation";
 	static final String APIKEY_FILE_NOT_FOUND = "error.annotation_apikey_file_not_found";
 	static final String INVALID_APIKEY = "error.annotation_invalid_apikey";
+	static final String INVALID_PRIVATE_KEY = "error.annotation_invalid_private_key";
 	static final String TEST_USER_FORBIDDEN = "error.annotation_test_user_forbidden";
 	static final String LOCKED_MAINTENANCE = "error.annotation_lock_maintenance";
 	static final String AUTHENTICATION_FAIL = "error.annotation_authentication_fail";
@@ -37,9 +38,24 @@ public interface I18nConstants {
 	static final String MESSAGE_INVALID_TAG_ID_FORMAT = "error.message_invalid_tag_id_format";
 	static final String MESSAGE_MISSING_MANDATORY_FIELD = "error.message_missing_mandatory_field";
 	static final String MESSAGE_WRONG_CLASS = "error.message_wrong_class";
-	static final String INVALID_PROVIDER = "error.invalid_provider";
 	static final String SOLR_EXCEPTION = "error.solr_exception";
-	
+
+	static final String PROVIDER_INVALID_ID = "error.provider_invalid_id";
+	static final String PROVIDER_ID_EXISTS = "error.provider_id_exists";
+	static final String PROVIDER_CANT_PARSE_BODY = "error.provider_cant_parse_body";
+	static final String PROVIDER_MISSING_MANDATORY_FIELD = "error.provider_missing_mandatory_field";
+	static final String PROVIDER_ID_GENERATION_TYPE_DOES_NOT_MATCH = "error.provider_id_generation_type_does_not_match";
+	static final String PROVIDER_MESSAGE_IDENTIFIER_WRONG = "error.provider_message_identifier_wrong";
+
+	static final String USER_INVALID_ID = "error.user_invalid_id";
+	static final String USER_ID_EXISTS = "error.user_id_exists";
+	static final String USER_CANT_PARSE_BODY = "error.user_cant_parse_body";
+	static final String USER_MISSING_MANDATORY_FIELD = "error.user_missing_mandatory_field";
+	static final String USER_ID_GENERATION_TYPE_DOES_NOT_MATCH = "error.user_id_generation_type_does_not_match";
+	static final String USER_MESSAGE_IDENTIFIER_WRONG = "error.user_message_identifier_wrong";
+	static final String USER_INVALID_KEY = "error.user_invalid_key";
+	static final String USER_NO_SUCH_ALGORITHM = "error.user_no_such_algorithm";
+
 	static final String BATCH_UPLOAD_FAILED = "error.batch_upload_failed";
 	
 	static final String OPERATION_EXECUTION_NOT_ALLOWED = "error.operation_execution_not_allowed";

@@ -4,7 +4,6 @@ import org.mongodb.morphia.annotations.Embedded;
 
 import eu.europeana.annotation.definitions.model.AnnotationId;
 import eu.europeana.annotation.definitions.model.impl.BaseAnnotationId;
-import eu.europeana.annotation.mongo.model.internal.PersistentObject;
 
 @Embedded
 /**
@@ -12,7 +11,7 @@ import eu.europeana.annotation.mongo.model.internal.PersistentObject;
  * @author GrafR
  *
  */
-public class MongoAnnotationId extends BaseAnnotationId implements PersistentObject{
+public class MongoAnnotationId extends BaseAnnotationId{
 
 	/**
 	 * 

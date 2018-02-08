@@ -19,11 +19,10 @@ import org.springframework.util.MultiValueMap;
 import eu.europeana.annotation.config.AnnotationConfiguration;
 import eu.europeana.annotation.definitions.model.Annotation;
 import eu.europeana.annotation.definitions.model.AnnotationId;
-import eu.europeana.annotation.definitions.model.Provider;
+import eu.europeana.annotation.definitions.model.authentication.Provider;
+import eu.europeana.annotation.definitions.model.authentication.impl.BaseProvider;
 import eu.europeana.annotation.definitions.model.impl.AbstractAnnotation;
-import eu.europeana.annotation.definitions.model.impl.AbstractProvider;
 import eu.europeana.annotation.definitions.model.impl.BaseAnnotationId;
-import eu.europeana.annotation.definitions.model.impl.BaseProvider;
 import eu.europeana.annotation.definitions.model.utils.AnnotationBuilder;
 import eu.europeana.annotation.definitions.model.utils.AnnotationIdHelper;
 import eu.europeana.annotation.definitions.model.utils.TypeUtils;
@@ -33,7 +32,9 @@ import eu.europeana.annotation.mongo.model.internal.PersistentWhitelistEntry;
 import eu.europeana.annotation.web.exception.authentication.ApplicationAuthenticationException;
 import eu.europeana.annotation.web.exception.request.ParamValidationException;
 import eu.europeana.annotation.web.http.AnnotationHttpHeaders;
+import eu.europeana.annotation.web.model.AnnotationOperationResponse;
 import eu.europeana.annotation.web.model.AnnotationSearchResults;
+import eu.europeana.annotation.web.model.ProviderOperationResponse;
 import eu.europeana.annotation.web.model.ProviderSearchResults;
 import eu.europeana.annotation.web.model.WhitelsitSearchResults;
 import eu.europeana.annotation.web.service.AdminService;
@@ -46,6 +47,7 @@ import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.web.controller.ApiResponseBuilder;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.ApiResponse;
+import eu.europeana.api2.utils.JsonWebUtils;
 import eu.europeana.apikey.client.ValidationRequest;
 
 public class BaseRest extends ApiResponseBuilder {
@@ -202,15 +204,15 @@ public class BaseRest extends ApiResponseBuilder {
 		return response;
 	}
 
-	public ProviderSearchResults<AbstractProvider> buildProviderSearchResponse(List<? extends Provider> providers,
+	public ProviderSearchResults<BaseProvider> buildProviderSearchResponse(List<? extends Provider> providers,
 			String apiKey, String action) {
-		ProviderSearchResults<AbstractProvider> response = new ProviderSearchResults<AbstractProvider>(apiKey, action);
-		response.items = new ArrayList<AbstractProvider>(providers.size());
+		ProviderSearchResults<BaseProvider> response = new ProviderSearchResults<BaseProvider>(apiKey, action);
+		response.items = new ArrayList<BaseProvider>(providers.size());
 
 		for (Provider provider : providers) {
 			BaseProvider webProvider = new BaseProvider();
 			webProvider.setName(provider.getName());
-			webProvider.setUri(provider.getUri());
+			webProvider.setHttpUrl(provider.getHttpUrl());
 			webProvider.setIdGeneration(IdGenerationTypes.getValueByType(provider.getIdGeneration()));
 			response.items.add(webProvider);
 		}
@@ -421,4 +423,58 @@ public class BaseRest extends ApiResponseBuilder {
 		}
 		return userToken;
 	}
+	
+	
+    /**
+     * Validate private key (by cipher a constant string with the public key and decipher with the private), 
+     * if false respond with HTTP 401.
+     * @param publicKey
+     * @param privateKey
+     * @return true if validation ok
+     * @throws ApplicationAuthenticationException
+     */
+    public boolean validatePrivateKey(String publicKey, String privateKey) 
+    		throws ApplicationAuthenticationException {
+    	
+    	boolean res = false;
+    	
+   	    String validationString = getConfiguration().getValidationString();
+    	
+        if (StringUtils.isBlank(publicKey)) 
+        	throw new ApplicationAuthenticationException(
+        			null, I18nConstants.INVALID_APIKEY, new String[]{publicKey});
+
+        if (StringUtils.isNotBlank(privateKey)) {
+            //res = getAdminService().validatePrivateKey(publicKey, privateKey, validationString); // TODO
+        	res = true;
+        } else {
+        	throw new ApplicationAuthenticationException(
+        			null, I18nConstants.INVALID_PRIVATE_KEY, new String[]{privateKey});
+        }
+        return res;
+    }
+
+    
+    /**
+     * This method generates custom annotation operation response.
+     * @param wsKey
+     * @param action
+     * @param message
+     * @return response entity
+     */
+    public ResponseEntity<String> buildAnnotationOperationResponse(String wsKey, String action, String message) {
+    	eu.europeana.annotation.web.service.controller.ApiResponseBuilder arb = 
+    			new eu.europeana.annotation.web.service.controller.ApiResponseBuilder();
+		AnnotationOperationResponse aor = arb.getValidationReport(
+				wsKey
+				, action
+				, message
+				, null
+				, false
+				);
+		String jsonStr = JsonWebUtils.toJson(aor, null);
+		HttpStatus httpStatus = aor.success ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
+		return buildResponseEntityForJsonString(jsonStr, httpStatus);			    	
+    }
+	
 }

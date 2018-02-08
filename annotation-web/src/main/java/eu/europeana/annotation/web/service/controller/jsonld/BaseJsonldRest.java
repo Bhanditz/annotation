@@ -13,17 +13,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.gson.Gson;
 
 import eu.europeana.annotation.definitions.exception.AnnotationAttributeInstantiationException;
 import eu.europeana.annotation.definitions.exception.AnnotationInstantiationException;
 import eu.europeana.annotation.definitions.exception.AnnotationValidationException;
+import eu.europeana.annotation.definitions.exception.ProviderValidationException;
+import eu.europeana.annotation.definitions.exception.UserValidationException;
 import eu.europeana.annotation.definitions.model.Annotation;
 import eu.europeana.annotation.definitions.model.AnnotationId;
 import eu.europeana.annotation.definitions.model.agent.Agent;
 import eu.europeana.annotation.definitions.model.authentication.Application;
+import eu.europeana.annotation.definitions.model.authentication.Provider;
+import eu.europeana.annotation.definitions.model.authentication.User;
+import eu.europeana.annotation.definitions.model.authentication.impl.BaseProvider;
 import eu.europeana.annotation.definitions.model.factory.impl.AgentObjectFactory;
 import eu.europeana.annotation.definitions.model.impl.AbstractAnnotation;
 import eu.europeana.annotation.definitions.model.impl.BaseAnnotationId;
@@ -38,6 +42,7 @@ import eu.europeana.annotation.definitions.model.search.result.AnnotationPage;
 import eu.europeana.annotation.definitions.model.search.result.impl.AnnotationPageImpl;
 import eu.europeana.annotation.definitions.model.utils.AnnotationsList;
 import eu.europeana.annotation.definitions.model.vocabulary.AgentTypes;
+import eu.europeana.annotation.definitions.model.vocabulary.IdGenerationTypes;
 import eu.europeana.annotation.definitions.model.vocabulary.MotivationTypes;
 import eu.europeana.annotation.definitions.model.vocabulary.WebAnnotationFields;
 import eu.europeana.annotation.mongo.model.internal.PersistentAnnotation;
@@ -46,6 +51,8 @@ import eu.europeana.annotation.utils.parse.AnnotationPageParser;
 import eu.europeana.annotation.utils.serialize.AnnotationLdSerializer;
 import eu.europeana.annotation.utils.serialize.AnnotationPageSerializer;
 import eu.europeana.annotation.web.exception.InternalServerException;
+import eu.europeana.annotation.web.exception.ProviderOperationException;
+import eu.europeana.annotation.web.exception.UserOperationException;
 import eu.europeana.annotation.web.exception.authorization.OperationAuthorizationException;
 import eu.europeana.annotation.web.exception.request.ParamValidationException;
 import eu.europeana.annotation.web.exception.request.RequestBodyValidationException;
@@ -147,6 +154,95 @@ public class BaseJsonldRest extends BaseRest {
 		}
 
 	}
+	
+	
+	/**
+	 * This method stores Provider in the database and serializes the response in JsonLd format.
+	 * @param wsKey
+	 * @param agentType
+	 * @param webAgent
+	 * @param userToken
+	 * @param providerId
+	 * @return stored agent object
+	 * @throws HttpException
+	 */
+	protected ResponseEntity<String> storeProvider(String wsKey, AgentTypes agentType, Agent webAgent
+			, String userToken, String providerId) 
+			throws HttpException {
+		
+		/** build provider */
+		Provider provider = new BaseProvider();
+		IdGenerationTypes idGeneration = IdGenerationTypes.getValueByType(
+				IdGenerationTypes.GENERATED_BY_PROVIDER.getIdType());
+		if (!IdGenerationTypes.isRegistered(idGeneration.name())) {
+			throw new ProviderOperationException(I18nConstants.PROVIDER_ID_GENERATION_TYPE_DOES_NOT_MATCH, 
+					I18nConstants.PROVIDER_ID_GENERATION_TYPE_DOES_NOT_MATCH + IdGenerationTypes.printTypes(), 
+					new String[]{WebAnnotationFields.PROVIDER, providerId});
+		}
+		provider.setApiKey(wsKey);
+		provider.setName(webAgent.getName());
+		provider.setInternalType(webAgent.getInternalType());
+		provider.setType(webAgent.getType());
+		provider.setHttpUrl(providerId);
+		provider.setIdGeneration(idGeneration);
+		
+		/** store */
+		Agent storedAgent;
+		try {
+			storedAgent = getAnnotationService().storeProvider(provider);
+		} catch (ProviderValidationException e) {
+			throw new ProviderOperationException(e.getMessage(), e.getMessage(), 
+					new String[]{WebAnnotationFields.PROVIDER, provider.getName()});
+		}
+
+		/** serialize to jsonld */
+		JsonLd agentLd = new AnnotationLdSerializer(storedAgent);
+		String jsonLd = agentLd.toString(4);
+
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+		headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+		headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_POST);
+
+		ResponseEntity<String> response = new ResponseEntity<String>(jsonLd, headers, HttpStatus.OK);
+
+		return response;
+	}	
+	
+	
+	/**
+	 * This method stores User in the database and serializes the response in JsonLd format.
+	 * @param wsKey
+	 * @param agentType
+	 * @param user
+	 * @return stored agent object
+	 * @throws HttpException
+	 */
+	protected ResponseEntity<String> storeUser(String wsKey, AgentTypes agentType, User user) 
+			throws HttpException {
+		
+		/** store */
+		Agent storedAgent;
+		try {
+			storedAgent = getAnnotationService().storeUser(user);
+		} catch (UserValidationException e) {
+			throw new UserOperationException(e.getMessage(), e.getMessage(), 
+					new String[]{WebAnnotationFields.USER, user.getName()});
+		}
+
+		/** serialize to jsonld */
+		JsonLd agentLd = new AnnotationLdSerializer(storedAgent);
+		String jsonLd = agentLd.toString(4);
+
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+		headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+		headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_POST);
+
+		ResponseEntity<String> response = new ResponseEntity<String>(jsonLd, headers, HttpStatus.NO_CONTENT);
+
+		return response;
+	}	
 	
 	
 	protected ResponseEntity<String> storeAnnotations(String wsKey, String provider, String annotationPageIn, String userToken) throws HttpException {
@@ -725,7 +821,7 @@ public class BaseJsonldRest extends BaseRest {
 
 			moderationRecord.addReport(vote);
 			moderationRecord.computeSummary();
-			moderationRecord.setLastUpdated(reportDate);
+			moderationRecord.setLastUpdate(reportDate);
 
 			// update record in the database
 			ModerationRecord storedModeration = getAnnotationService().storeModerationRecord(moderationRecord);
@@ -733,7 +829,7 @@ public class BaseJsonldRest extends BaseRest {
 			// build response
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
 			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-			headers.add(HttpHeaders.ETAG, Long.toString(storedModeration.getLastUpdated().hashCode()));
+			headers.add(HttpHeaders.ETAG, Long.toString(storedModeration.getLastUpdate().hashCode()));
 			// headers.add(HttpHeaders.LINK,
 			// "<http://www.w3.org/ns/ldp#Resource>; rel=\"type\"");
 			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
@@ -765,7 +861,7 @@ public class BaseJsonldRest extends BaseRest {
 
 		// SET DEFAULTS
 		moderationRecord.setCreated(reportDate);
-		moderationRecord.setLastUpdated(reportDate);
+		moderationRecord.setLastUpdate(reportDate);
 
 		Summary summary = new BaseSummary();
 		moderationRecord.setSummary(summary);

@@ -135,4 +135,13 @@ public interface AdminService {
      */
 	public boolean validateApiKey(ValidationRequest request, String method) throws ApplicationAuthenticationException;
 
+    /**
+     * This method employs assimetric cryptographie methods public/private key pair validation
+     * @param publicKeyStr
+     * @param privateKeyStr
+     * @param msg The message for encryption and decryption
+     * @return true if private key is valid
+     */
+    public boolean validatePrivateKey(String publicKeyStr, String privateKeyStr, String msg);
+	
 }

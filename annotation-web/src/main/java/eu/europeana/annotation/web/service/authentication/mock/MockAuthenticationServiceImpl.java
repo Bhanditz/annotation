@@ -28,7 +28,7 @@ import eu.europeana.annotation.mongo.model.internal.PersistentClient;
 import eu.europeana.annotation.mongo.service.PersistentClientService;
 import eu.europeana.annotation.web.exception.authentication.ApplicationAuthenticationException;
 import eu.europeana.annotation.web.exception.authorization.UserAuthorizationException;
-import eu.europeana.annotation.web.model.vocabulary.UserGroups;
+import eu.europeana.annotation.web.model.vocabulary.Roles;
 import eu.europeana.annotation.web.service.authentication.AuthenticationService;
 import eu.europeana.annotation.web.service.authentication.model.ApplicationDeserializer;
 import eu.europeana.annotation.web.service.authentication.model.BaseDeserializer;
@@ -161,15 +161,15 @@ public class MockAuthenticationServiceImpl implements AuthenticationService, Res
 		app.setOrganization(organization);
 		Agent annonymous = AgentObjectFactory.getInstance().createObjectInstance(AgentTypes.PERSON);
 		annonymous.setName(applicationName + "-" + WebAnnotationFields.USER_ANONYMOUNS);
-		annonymous.setUserGroup(UserGroups.ANONYMOUS.name());
+		annonymous.setUserGroup(Roles.ANONYMOUS.name());
 		app.setAnonymousUser(annonymous);
 
 		Agent admin = AgentObjectFactory.getInstance().createObjectInstance(AgentTypes.PERSON);
 		admin.setName(applicationName + "-" + WebAnnotationFields.USER_ADMIN);
 		if (WebAnnotationFields.PROVIDER_EUROPEANA_DEV.equals(applicationName))
-			admin.setUserGroup(UserGroups.ADMIN.name());
+			admin.setUserGroup(Roles.ADMIN.name());
 		else
-			admin.setUserGroup(UserGroups.USER.name());
+			admin.setUserGroup(Roles.USER.name());
 
 		app.setAdminUser(admin);
 
@@ -189,7 +189,7 @@ public class MockAuthenticationServiceImpl implements AuthenticationService, Res
 		String username = "Europeana Collections Curator";
 		collectionsUser.setName(applicationName + "-" + username);
 		collectionsUser.setHttpUrl(username + "@" + applicationName);
-		collectionsUser.setUserGroup(UserGroups.USER.name());
+		collectionsUser.setUserGroup(Roles.USER.name());
 
 		app.addAuthenticatedUser(COLLECTIONS_USER_TOKEN, collectionsUser);
 	}
@@ -217,7 +217,7 @@ public class MockAuthenticationServiceImpl implements AuthenticationService, Res
 		Agent tester1 = AgentObjectFactory.getInstance().createObjectInstance(AgentTypes.PERSON);
 		tester1.setName(applicationName + "-" + username);
 		tester1.setHttpUrl(username + "@" + applicationName);
-		tester1.setUserGroup(UserGroups.TESTER.name());
+		tester1.setUserGroup(Roles.TESTER.name());
 		return tester1;
 	}
 

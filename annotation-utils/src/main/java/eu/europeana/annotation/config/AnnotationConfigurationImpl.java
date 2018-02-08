@@ -68,4 +68,9 @@ public class AnnotationConfigurationImpl implements AnnotationConfiguration{
 		return Long.parseLong(getAnnotationProperties().getProperty(API_KEY_CACHING_TIME));
 	}
 	
+	@Override
+	public String getValidationString() {
+		return getAnnotationProperties().getProperty(VALIDATION_STRING);
+	}
+	
 }

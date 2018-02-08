@@ -46,8 +46,11 @@
 	<bean name="annotation_db_tagService" class="eu.europeana.annotation.mongo.service.PersistentTagServiceImpl"
 		p:dao-ref="annotation_db_tagDao"/>
 		
-	<bean name="annotation_db_providerService" class="eu.europeana.annotation.mongo.service.PersistentProviderServiceImpl"
+	<bean name="annotation_db_providerService" class="eu.europeana.annotation.mongo.service.authentication.PersistentProviderServiceImpl"
 		p:dao-ref="annotation_db_providerDao"/>
+		
+	<bean name="annotation_db_userService" class="eu.europeana.annotation.mongo.service.authentication.PersistentUserServiceImpl"
+		p:dao-ref="annotation_db_userDao"/>
 		
 	<bean name="annotation_db_conceptService" class="eu.europeana.annotation.mongo.service.PersistentConceptServiceImpl"
 		p:dao-ref="annotation_db_conceptDao"/>

@@ -29,9 +29,9 @@ public interface ModerationRecord {
 
 	public void setCreated(Date created);
 
-	public Date getLastUpdated();
+	public Date getLastUpdate();
 
-	public void setLastUpdated(Date lastUpdated);
+	public void setLastUpdate(Date lastUpdated);
 	
 	public void addReport(Vote vote);
 

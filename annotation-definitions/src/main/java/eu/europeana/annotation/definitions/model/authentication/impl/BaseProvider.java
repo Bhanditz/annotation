@@ -1,37 +1,28 @@
-package eu.europeana.annotation.definitions.model.impl;
+package eu.europeana.annotation.definitions.model.authentication.impl;
 
-import eu.europeana.annotation.definitions.model.Provider;
+import eu.europeana.annotation.definitions.model.agent.impl.BaseAgent;
+import eu.europeana.annotation.definitions.model.authentication.Provider;
 import eu.europeana.annotation.definitions.model.vocabulary.IdGenerationTypes;
 
 
-public abstract class AbstractProvider implements Provider {
+public class BaseProvider extends BaseAgent implements Provider {
 
-	private String name;
-	private String uri;
+	private String apiKey;
 	private IdGenerationTypes idGeneration;
 
 	
-	public AbstractProvider(){
+	public BaseProvider(){
 		super();
 	}
 	
-
-	public String getName() {
-		return name;
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public String getApiKey() {
+		return this.apiKey;
 	}
-
-	public String getUri() {
-		return uri;
-	}
-
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-
+	
 	public String getIdGeneration() {
 		return idGeneration.getIdType();
 	}
@@ -59,9 +50,9 @@ public abstract class AbstractProvider implements Provider {
 	    	res = false;
 	    }
 	    
-	    if ((this.getUri() != null) && (that.getUri() != null) &&
-	    		(!this.getUri().equals(that.getUri()))) {
-	    	System.out.println("Provider objects have different 'uri' fields.");
+	    if ((this.getHttpUrl() != null) && (that.getHttpUrl() != null) &&
+	    		(!this.getHttpUrl().equals(that.getHttpUrl()))) {
+	    	System.out.println("Provider objects have different 'httpUrls' fields.");
 	    	res = false;
 	    }
 	    
@@ -77,10 +68,10 @@ public abstract class AbstractProvider implements Provider {
 	@Override
 	public String toString() {
 		String res = "### Provider ###\n";
-		if (name != null) 
-			res = res + "\t" + "name:" + name + "\n";
-		if (uri != null) 
-			res = res + "\t" + "uri:" + uri + "\n";
+		if (getName() != null) 
+			res = res + "\t" + "name:" + getName() + "\n";
+		if (getHttpUrl() != null) 
+			res = res + "\t" + "httpUrl:" + getHttpUrl() + "\n";
 		if (idGeneration != null) 
 			res = res + "\t" + "idGeneration:" + idGeneration + "\n";
 		return res;

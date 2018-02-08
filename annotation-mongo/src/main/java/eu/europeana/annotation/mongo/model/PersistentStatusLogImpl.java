@@ -1,5 +1,7 @@
 package eu.europeana.annotation.mongo.model;
 
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -10,7 +12,7 @@ import eu.europeana.annotation.mongo.model.internal.PersistentObject;
 import eu.europeana.annotation.mongo.model.internal.PersistentStatusLog;
 
 @Entity("statusLog")
-@Polymorphic
+/** @Deprecated not needed anymore */
 public class PersistentStatusLogImpl implements PersistentStatusLog, PersistentObject {
 
 	@Id
@@ -89,6 +91,30 @@ public class PersistentStatusLogImpl implements PersistentStatusLog, PersistentO
 	public Long getLastIndexedTimestamp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Date getCreated() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setCreated(Date creationDate) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Date getLastUpdate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setLastUpdate(Date lastUpdate) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

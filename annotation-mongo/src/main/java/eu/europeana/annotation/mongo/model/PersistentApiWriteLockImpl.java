@@ -74,4 +74,24 @@ public class PersistentApiWriteLockImpl implements PersistentObject, PersistentA
 				+ "ended:" + getEnded().toString() + "] " ;
 	}
 
+	@Override
+	public Date getCreated() {
+		return getStarted();
+	}
+
+	@Override
+	public void setCreated(Date creationDate) {
+        //do nothing, see getter
+	}
+
+	@Override
+	public Date getLastUpdate() {
+		return getEnded();
+	}
+
+	@Override
+	public void setLastUpdate(Date lastUpdate) {
+		//do nothing, see getter
+	}
+
 }

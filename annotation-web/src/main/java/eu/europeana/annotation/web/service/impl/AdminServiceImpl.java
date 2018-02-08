@@ -1,5 +1,8 @@
 package eu.europeana.annotation.web.service.impl;
 
+import java.io.File;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -363,6 +366,55 @@ public class AdminServiceImpl extends BaseAnnotationServiceImpl implements Admin
 		Client clientApp = updateClientConfig(storedClient, APP_CONFIG_SELF);
 		return clientApp;
 	}
+	
+	
+    /**
+     * This method employs assimetric cryptographie methods public/private key pair validation
+     * @param publicKeyStr
+     * @param privateKeyStr
+     * @param msg The message for encryption and decryption
+     * @return true if private key is valid
+     */
+    public boolean validatePrivateKey(String publicKeyStr, String privateKeyStr, String msg) {
+    	
+    	boolean res = false;
+    	
+        try {
+            if (StringUtils.isBlank(publicKeyStr)) {
+            	logger.debug("Public key not provided");
+            	return res;
+            }
+            if (StringUtils.isBlank(privateKeyStr)) {
+            	logger.debug("Private key not provided");
+            	return res;
+            }
+
+            AssymetricKeyManager ac = new AssymetricKeyManager();
+//    		PrivateKey privateKey = ac.getPrivate("KeyPair/privateKey");
+//    		PublicKey publicKey = ac.getPublic("KeyPair/publicKey");
+    		PrivateKey privateKey = ac.getPrivateFromString(privateKeyStr);
+    		PublicKey publicKey = ac.getPublicFromString(publicKeyStr);
+
+    		String encrypted_msg = ac.encryptTextByPublicKey(msg, publicKey);
+    		String decrypted_msg = ac.decryptTextByPrivateKey(encrypted_msg, privateKey);
+//    		String encrypted_msg = ac.encryptText(msg, privateKey);
+//    		String decrypted_msg = ac.decryptText(encrypted_msg, publicKey);
+    		logger.info("Original Message: " + msg +
+    			"\nEncrypted Message: " + encrypted_msg
+    			+ "\nDecrypted Message: " + decrypted_msg);
+    		
+    		if (msg.equals(decrypted_msg))
+    			res = true;
+
+        } catch (ApiKeyValidationException e) {
+        	logger.error(e.getMessage());
+        } catch (Exception e) {
+        	logger.error(e.getMessage());
+        }
+        
+        return res;
+    }
+		
 
 }
   

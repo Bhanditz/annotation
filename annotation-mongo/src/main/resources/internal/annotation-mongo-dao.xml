@@ -47,7 +47,12 @@
 
 	<!-- annotation dao bean (concrete instance) -->
 	<bean id="annotation_db_providerDao" parent="corelib_db_nosql_annotation_dao" class="eu.europeana.annotation.mongo.dao.PersistentProviderDaoImpl">
-		<constructor-arg type="java.lang.Class" value="eu.europeana.annotation.mongo.model.PersistentProviderImpl" />
+		<constructor-arg type="java.lang.Class" value="eu.europeana.annotation.mongo.model.authentication.PersistentProviderImpl" />
+	</bean>
+	
+	<!-- annotation dao bean (concrete instance) -->
+	<bean id="annotation_db_userDao" parent="corelib_db_nosql_annotation_dao" class="eu.europeana.annotation.mongo.dao.PersistentUserDaoImpl">
+		<constructor-arg type="java.lang.Class" value="eu.europeana.annotation.mongo.model.authentication.PersistentUserImpl" />
 	</bean>
 	
 	<!-- annotation dao bean (concrete instance) -->

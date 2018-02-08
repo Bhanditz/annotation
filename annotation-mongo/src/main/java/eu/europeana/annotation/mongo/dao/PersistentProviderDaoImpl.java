@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.mongodb.morphia.Datastore;
 
-import eu.europeana.annotation.mongo.model.internal.PersistentProvider;
+import eu.europeana.annotation.mongo.model.authentication.internal.PersistentProvider;
 import eu.europeana.api.commons.nosql.dao.impl.NosqlDaoImpl;
 
 public class PersistentProviderDaoImpl <E extends PersistentProvider, T extends Serializable>

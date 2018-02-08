@@ -1,13 +1,10 @@
 package eu.europeana.annotation.web.service.impl;
 
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +13,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.stanbol.commons.exception.JsonParseException;
-import org.springframework.http.HttpStatus;
 
 import com.google.common.base.Strings;
 
@@ -28,36 +22,36 @@ import eu.europeana.annotation.definitions.exception.AnnotationAttributeInstanti
 import eu.europeana.annotation.definitions.exception.AnnotationValidationException;
 import eu.europeana.annotation.definitions.exception.ModerationRecordValidationException;
 import eu.europeana.annotation.definitions.exception.ProviderValidationException;
+import eu.europeana.annotation.definitions.exception.UserValidationException;
 import eu.europeana.annotation.definitions.model.Annotation;
 import eu.europeana.annotation.definitions.model.AnnotationId;
-import eu.europeana.annotation.definitions.model.Provider;
 import eu.europeana.annotation.definitions.model.StatusLog;
+import eu.europeana.annotation.definitions.model.agent.Agent;
+import eu.europeana.annotation.definitions.model.authentication.Provider;
+import eu.europeana.annotation.definitions.model.authentication.User;
 import eu.europeana.annotation.definitions.model.body.Body;
 import eu.europeana.annotation.definitions.model.body.PlaceBody;
 import eu.europeana.annotation.definitions.model.entity.Concept;
 import eu.europeana.annotation.definitions.model.entity.Place;
+import eu.europeana.annotation.definitions.model.impl.BaseAnnotationId;
 import eu.europeana.annotation.definitions.model.impl.BaseStatusLog;
 import eu.europeana.annotation.definitions.model.moderation.ModerationRecord;
 import eu.europeana.annotation.definitions.model.utils.AnnotationBuilder;
-import eu.europeana.annotation.definitions.model.utils.AnnotationHttpUrls;
 import eu.europeana.annotation.definitions.model.utils.AnnotationIdHelper;
-import eu.europeana.annotation.definitions.model.utils.AnnotationsList;
+import eu.europeana.annotation.definitions.model.vocabulary.AgentTypes;
 import eu.europeana.annotation.definitions.model.vocabulary.BodyInternalTypes;
 import eu.europeana.annotation.definitions.model.vocabulary.IdGenerationTypes;
 import eu.europeana.annotation.definitions.model.vocabulary.MotivationTypes;
 import eu.europeana.annotation.definitions.model.vocabulary.WebAnnotationFields;
-import eu.europeana.annotation.mongo.batch.BulkOperationMode;
-import eu.europeana.annotation.mongo.exception.AnnotationMongoException;
 import eu.europeana.annotation.mongo.exception.BulkOperationException;
 import eu.europeana.annotation.mongo.exception.ModerationMongoException;
-import eu.europeana.annotation.mongo.model.PersistentAnnotationImpl;
-import eu.europeana.annotation.mongo.model.internal.GeneratedAnnotationIdImpl;
 import eu.europeana.annotation.mongo.model.internal.PersistentAnnotation;
 import eu.europeana.annotation.mongo.service.PersistentConceptService;
-import eu.europeana.annotation.mongo.service.PersistentProviderService;
 import eu.europeana.annotation.mongo.service.PersistentStatusLogService;
 import eu.europeana.annotation.mongo.service.PersistentTagService;
 import eu.europeana.annotation.mongo.service.PersistentWhitelistService;
+import eu.europeana.annotation.mongo.service.authentication.PersistentProviderService;
+import eu.europeana.annotation.mongo.service.authentication.PersistentUserService;
 import eu.europeana.annotation.solr.exceptions.AnnotationServiceException;
 import eu.europeana.annotation.solr.exceptions.StatusLogServiceException;
 import eu.europeana.annotation.solr.exceptions.TagServiceException;
@@ -67,12 +61,10 @@ import eu.europeana.annotation.utils.UriUtils;
 import eu.europeana.annotation.utils.parse.AnnotationLdParser;
 import eu.europeana.annotation.web.exception.request.ParamValidationException;
 import eu.europeana.annotation.web.exception.request.RequestBodyValidationException;
-import eu.europeana.annotation.web.exception.response.BatchUploadException;
 import eu.europeana.annotation.web.model.BatchReportable;
 import eu.europeana.annotation.web.model.BatchUploadStatus;
 import eu.europeana.annotation.web.service.AnnotationDefaults;
 import eu.europeana.annotation.web.service.AnnotationService;
-import eu.europeana.annotation.definitions.model.impl.BaseAnnotationId;
 import eu.europeana.api.common.config.I18nConstants;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -84,6 +76,9 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 
 	@Resource
 	PersistentProviderService mongoProviderPersistance;
+
+	@Resource
+	PersistentUserService mongoUserPersistance;
 
 	@Resource
 	PersistentConceptService mongoConceptPersistence;
@@ -135,6 +130,14 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 
 	public void setMongoProviderPersistance(PersistentProviderService mongoProviderPersistance) {
 		this.mongoProviderPersistance = mongoProviderPersistance;
+	}
+
+	public PersistentUserService getMongoUserPersistence() {
+		return mongoUserPersistance;
+	}
+
+	public void setMongoUserPersistance(PersistentUserService mongoUserPersistance) {
+		this.mongoUserPersistance = mongoUserPersistance;
 	}
 
 	public PersistentConceptService getMongoConceptPersistence() {
@@ -223,7 +226,23 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 	}
 
 	@Override
-	public Provider storeProvider(Provider newProvider) {
+	public Agent parseAgentLd(AgentTypes agentType, String agentJsonLdStr)
+			throws JsonParseException, HttpException {
+
+		/**
+		 * parse JsonLd string using JsonLdParser. JsonLd string -> JsonLdParser
+		 * -> JsonLd object
+		 */
+		try {
+			AnnotationLdParser europeanaParser = new AnnotationLdParser();
+			return europeanaParser.parseAgentStr(agentType, agentJsonLdStr);
+		} catch (AnnotationAttributeInstantiationException e) {
+			throw new RequestBodyValidationException(agentJsonLdStr, I18nConstants.ANNOTATION_CANT_PARSE_BODY, e);
+		}
+	}
+
+	@Override
+	public Provider storeProvider(Provider newProvider) throws ProviderValidationException {
 
 		// must have registered id generation type.
 		validateProvider(newProvider);
@@ -234,12 +253,48 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 		return res;
 	}
 
+	@Override
+	public int deleteProviderEntry(String id) throws ProviderValidationException {
+		int res = getMongoProviderPersistence().removeById(id);
+		if (res == 0) 
+			throw new ProviderValidationException(ProviderValidationException.ERROR_NO_ENTRIES_FOUND_TO_DELETE);
+		return res;
+	}
+	
+	@Override
+	public int deleteProviderEntryByName(String name) throws ProviderValidationException {
+		int res = getMongoProviderPersistence().removeByName(name);
+		if (res == 0) 
+			throw new ProviderValidationException(ProviderValidationException.ERROR_NO_ENTRIES_FOUND_TO_DELETE);
+		return res;
+	}
+	
+	@Override
+	public User storeUser(User newUser) throws UserValidationException {
+
+		// must have registered id generation type.
+		validateUser(newUser);
+
+		// store in mongo database
+		User res = getMongoUserPersistence().store(newUser);
+
+		return res;
+	}
+
+	@Override
+	public int deleteUserEntry(String name) {
+		int res = getMongoUserPersistence().removeByName(name);
+		if (res == 0) 
+			throw new UserValidationException(UserValidationException.ERROR_NO_ENTRIES_FOUND_TO_DELETE);
+		return res;
+	}
+	
 	/**
 	 * This method validates Provider object.
 	 * 
 	 * @param newProvider
 	 */
-	private void validateProvider(Provider newProvider) {
+	private void validateProvider(Provider newProvider) throws ProviderValidationException {
 
 		if (newProvider.getIdGeneration() == null)
 			throw new ProviderValidationException(ProviderValidationException.ERROR_NOT_NULL_ID_GENERATION);
@@ -248,18 +303,32 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 			throw new ProviderValidationException(ProviderValidationException.ERROR_NOT_STANDARDIZED_ID_GENERATION);
 	}
 
-	@Override
-	public List<? extends Provider> getProviderList(String idGeneration) {
-		return getMongoProviderPersistence().getProviderList(idGeneration);
+	/**
+	 * This method validates User object.
+	 * 
+	 * @param newUser
+	 */
+	private void validateUser(User newUser) throws UserValidationException {
+
+		if (newUser.getIdGeneration() == null)
+			throw new UserValidationException(UserValidationException.ERROR_NOT_NULL_ID_GENERATION);
+
+		if (StringUtils.isEmpty(IdGenerationTypes.isRegisteredAs(newUser.getIdGeneration())))
+			throw new UserValidationException(UserValidationException.ERROR_NOT_STANDARDIZED_ID_GENERATION);
 	}
 
-	@Override
-	public List<? extends Provider> getFilteredProviderList(String idGeneration, String startOn, String limit) {
-		return getMongoProviderPersistence().getFilteredProviderList(idGeneration, startOn, limit);
-	}
+//	@Override
+//	public List<? extends Provider> getProviderList(String idGeneration) {
+//		return getMongoProviderPersistence().getProviderList(idGeneration);
+//	}
+//
+//	@Override
+//	public List<? extends Provider> getFilteredProviderList(String idGeneration, String startOn, String limit) {
+//		return getMongoProviderPersistence().getFilteredProviderList(idGeneration, startOn, limit);
+//	}
 
 	@Override
-	public Provider updateProvider(Provider provider) {
+	public Provider updateProvider(Provider provider) throws ProviderValidationException {
 		Provider res = getMongoProviderPersistence().update(provider);
 		return res;
 	}
@@ -362,7 +431,7 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 		ModerationRecord res = getMongoModerationRecordPersistence().store(newModerationRecord);
 
 		// lastindexe
-		Date lastindexing = res.getLastUpdated();
+		Date lastindexing = res.getLastUpdate();
 
 		if (getConfiguration().isIndexingEnabled()) {
 			try {
@@ -617,9 +686,37 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 	 * eu.europeana.annotation.definitions.model.Provider)
 	 */
 	public boolean existsProviderInDb(Provider provider) {
+		return existsProviderIdInDb(provider.getHttpUrl());
+	}
+
+	public boolean existsProviderIdInDb(String providerId) {
 		boolean res = false;
 		try {
-			Provider dbRes = getMongoProviderPersistence().find(provider.getName(), provider.getIdGeneration());
+			Provider dbRes = getMongoProviderPersistence().findById(providerId);
+			if (dbRes != null)
+				res = true;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return res;
+	}
+
+	public boolean existsUserInDb(User user) {
+		boolean res = false;
+		try {
+			User dbRes = getMongoUserPersistence().find(user.getName(), user.getIdGeneration());
+			if (dbRes != null)
+				res = true;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return res;
+	}
+
+	public boolean existsUserIdInDb(String userId) {
+		boolean res = false;
+		try {
+			User dbRes = getMongoUserPersistence().findByHttpUrl(userId);
 			if (dbRes != null)
 				res = true;
 		} catch (Exception e) {
@@ -689,7 +786,7 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 //			throw new ParamValidationException(WebAnnotationFields.INVALID_PROVIDER, WebAnnotationFields.PROVIDER,
 //					annoId.getProvider());
 			throw new ParamValidationException("Invalid provider!", 
-					I18nConstants.INVALID_PROVIDER, 
+					I18nConstants.PROVIDER_INVALID_ID, 
 					new String[]{WebAnnotationFields.PROVIDER, annoId.getProvider()});
 		}
 

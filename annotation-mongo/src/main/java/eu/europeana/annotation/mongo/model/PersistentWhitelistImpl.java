@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Polymorphic;
 
@@ -110,6 +111,16 @@ public class PersistentWhitelistImpl implements PersistentWhitelistEntry, Persis
 	            + "name:" + getName() + ", " 
 	            + "url:" + getHttpUrl() + ", " 
 				+ ", last update: " + getLastUpdate() + "]";
+	}
+
+	@Override
+	public Date getCreated() {
+		return this.getCreationDate();
+	}
+
+	@Override
+	public void setCreated(Date creationDate) {
+		this.setCreationDate(creationDate);
 	}
 
 
