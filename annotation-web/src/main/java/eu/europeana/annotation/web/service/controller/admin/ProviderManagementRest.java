@@ -205,10 +205,10 @@ public class ProviderManagementRest extends BaseJsonldRest {
 					new String[]{WebAnnotationFields.PROVIDER, providerIdUrl});
 	}
 	
-	@RequestMapping(value = "/admin/promote", method = RequestMethod.POST
+	@RequestMapping(value = "/admin/user", method = RequestMethod.POST
 			, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ApiOperation(value = "Promote a new user", nickname = "promoteUser", response = java.lang.Void.class)
-	public ResponseEntity<String> promoteUser (
+	@ApiOperation(value = "Register a new user", nickname = "registerUser", response = java.lang.Void.class)
+	public ResponseEntity<String> createUser (
 		@RequestParam(value = WebAnnotationFields.PARAM_WSKEY, required = true) String wsKey,
 		@RequestParam(value = WebAnnotationFields.PARAM_USERNAME, required = false) String userName,
 		@RequestParam(value = WebAnnotationFields.PARAM_TYPE, required = false) String type,
