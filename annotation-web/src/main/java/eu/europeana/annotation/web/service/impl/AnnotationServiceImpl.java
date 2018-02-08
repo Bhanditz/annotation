@@ -310,11 +310,11 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 	 */
 	private void validateUser(User newUser) throws UserValidationException {
 
-		if (newUser.getIdGeneration() == null)
-			throw new UserValidationException(UserValidationException.ERROR_NOT_NULL_ID_GENERATION);
+//		if (newUser.getIdGeneration() == null)
+//			throw new UserValidationException(UserValidationException.ERROR_NOT_NULL_ID_GENERATION);
 
-		if (StringUtils.isEmpty(IdGenerationTypes.isRegisteredAs(newUser.getIdGeneration())))
-			throw new UserValidationException(UserValidationException.ERROR_NOT_STANDARDIZED_ID_GENERATION);
+//		if (StringUtils.isEmpty(IdGenerationTypes.isRegisteredAs(newUser.getIdGeneration())))
+//			throw new UserValidationException(UserValidationException.ERROR_NOT_STANDARDIZED_ID_GENERATION);
 	}
 
 //	@Override
@@ -702,21 +702,13 @@ public class AnnotationServiceImpl extends BaseAnnotationServiceImpl implements 
 	}
 
 	public boolean existsUserInDb(User user) {
-		boolean res = false;
-		try {
-			User dbRes = getMongoUserPersistence().find(user.getName(), user.getIdGeneration());
-			if (dbRes != null)
-				res = true;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return res;
+		return existsUserIdInDb(user.getHttpUrl());
 	}
 
 	public boolean existsUserIdInDb(String userId) {
 		boolean res = false;
 		try {
-			User dbRes = getMongoUserPersistence().findByHttpUrl(userId);
+			User dbRes = getMongoUserPersistence().findById(userId);
 			if (dbRes != null)
 				res = true;
 		} catch (Exception e) {

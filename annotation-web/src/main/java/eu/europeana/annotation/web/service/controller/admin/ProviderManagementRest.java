@@ -242,7 +242,6 @@ public class ProviderManagementRest extends BaseJsonldRest {
 		user.setInternalType(agentType.name());
 		user.setType(agentType.getJsonValue());
 		user.setHttpUrl(userIdUrl);
-		user.setIdGeneration(idGeneration);
 		
 		validateUser(userIdUrl, user);
 
